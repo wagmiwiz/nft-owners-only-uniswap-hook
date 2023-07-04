@@ -10,7 +10,7 @@ import {Hooks} from "@uniswap/v4-core/contracts/libraries/Hooks.sol";
 import {TickMath} from "@uniswap/v4-core/contracts/libraries/TickMath.sol";
 import {PoolManager} from "@uniswap/v4-core/contracts/PoolManager.sol";
 import {IPoolManager} from "@uniswap/v4-core/contracts/interfaces/IPoolManager.sol";
-import {PoolId} from "@uniswap/v4-core/contracts/libraries/PoolId.sol";
+import {PoolId, PoolIdLibrary} from "@uniswap/v4-core/contracts/libraries/PoolId.sol";
 import {PoolModifyPositionTest} from "@uniswap/v4-core/contracts/test/PoolModifyPositionTest.sol";
 import {PoolSwapTest} from "@uniswap/v4-core/contracts/test/PoolSwapTest.sol";
 import {PoolDonateTest} from "@uniswap/v4-core/contracts/test/PoolDonateTest.sol";
@@ -20,7 +20,8 @@ import {Counter} from "../src/Counter.sol";
 import {CounterImplementation} from "../src/implementation/CounterImplementation.sol";
 
 contract CounterTest is Test, Deployers, GasSnapshot {
-    using PoolId for IPoolManager.PoolKey;
+    using PoolIdLibrary for IPoolManager.PoolKey;
+    using PoolIdLibrary for PoolId;
     using CurrencyLibrary for Currency;
 
     Counter counter = Counter(
@@ -32,7 +33,7 @@ contract CounterTest is Test, Deployers, GasSnapshot {
     TestERC20 token0;
     TestERC20 token1;
     IPoolManager.PoolKey poolKey;
-    bytes32 poolId;
+    PoolId poolId;
 
     function setUp() public {
         token0 = new TestERC20(2**128);
@@ -54,7 +55,7 @@ contract CounterTest is Test, Deployers, GasSnapshot {
 
         // Create the pool
         poolKey = IPoolManager.PoolKey(Currency.wrap(address(token0)), Currency.wrap(address(token1)), 3000, 60, IHooks(counter));
-        poolId = PoolId.toId(poolKey);
+        poolId = poolKey.toId();
         manager.initialize(poolKey, SQRT_RATIO_1_1);
 
         // Helpers for interacting with the pool
